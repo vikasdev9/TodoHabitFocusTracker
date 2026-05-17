@@ -17,7 +17,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todohabitfocus.feature.habit.presentation.HabitViewModel
 import com.example.todohabitfocus.feature.habit.presentation.components.HabitCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDashboardScreen(
     onAddHabitClick: () -> Unit,
@@ -26,61 +25,51 @@ fun HabitDashboardScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            LargeTopAppBar(
-                title = { 
-                    Column {
-                        Text("My Habits", fontWeight = FontWeight.Bold)
+    Box(modifier = Modifier.fillMaxSize()) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (uiState.habits.isEmpty()) {
+            EmptyHabitsState(modifier = Modifier.align(Alignment.Center))
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Text(
+                            "My Habits",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(
                             "Building better version of you",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = { /* Open Analytics */ }) {
-                        Icon(Icons.Default.BarChart, contentDescription = "Analytics")
-                    }
-                },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = Color.Transparent
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddHabitClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                shape = MaterialTheme.shapes.large
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Habit")
-            }
-        },
-        containerColor = Color(0xFFF8F9FA)
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.habits.isEmpty()) {
-                EmptyHabitsState(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(uiState.habits, key = { it.habit.id }) { habitState ->
-                        HabitCard(
-                            habitState = habitState,
-                            onToggle = { viewModel.toggleHabit(habitState.habit.id) },
-                            onClick = { onHabitClick(habitState.habit.id) }
-                        )
-                    }
+                }
+                items(uiState.habits, key = { it.habit.id }) { habitState ->
+                    HabitCard(
+                        habitState = habitState,
+                        onToggle = { viewModel.toggleHabit(habitState.habit.id) },
+                        onClick = { onHabitClick(habitState.habit.id) }
+                    )
                 }
             }
+        }
+        
+        FloatingActionButton(
+            onClick = onAddHabitClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+            shape = MaterialTheme.shapes.large
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Habit")
         }
     }
 }

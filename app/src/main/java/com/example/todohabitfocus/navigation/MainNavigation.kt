@@ -9,11 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
-import com.example.todohabitfocus.core.ui.components.BottomBarItem
-import com.example.todohabitfocus.core.ui.components.FloatingBottomBar
 import com.example.todohabitfocus.feature.analytics.presentation.AnalyticsScreen
 import com.example.todohabitfocus.feature.focus.presentation.FocusScreen
 import com.example.todohabitfocus.feature.habit.presentation.dashboard.HabitDashboardScreen
@@ -35,34 +33,31 @@ fun MainNavigation() {
     )
 
     Scaffold(
-        floatingActionButton = {
-            if (currentDestination?.route != BottomNavItem.Focus.route) {
-                FloatingActionButton(
-                    onClick = { /* Handle Add Action */ },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = MaterialTheme.shapes.large,
-                    modifier = Modifier.padding(bottom = 80.dp) // Offset for floating bar
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add")
+        bottomBar = {
+            NavigationBar {
+                items.forEach { item ->
+                    val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                    NavigationBarItem(
+                        selected = isSelected,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = item.icon,
+                                contentDescription = item.label
+                            )
+                        },
+                        label = { Text(item.label) }
+                    )
                 }
             }
-        },
-        floatingActionButtonPosition = FabPosition.Center,
-        bottomBar = {
-            FloatingBottomBar(
-                items = items.map { BottomBarItem(it.route, it.icon, it.label) },
-                currentRoute = currentDestination?.route,
-                onItemClick = { route ->
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
-                        }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                }
-            )
         }
     ) { innerPadding ->
         NavHost(
@@ -94,7 +89,7 @@ fun MainNavigation() {
                 ) + fadeOut()
             }
         ) {
-            composable(BottomNavItem.Home.route) { 
+            composable(BottomNavItem.Home.route) {
                 HomeRoute(
                     onNavigateToTasks = { navController.navigate(BottomNavItem.Tasks.route) },
                     onNavigateToHabits = { navController.navigate(BottomNavItem.Habits.route) },
@@ -102,23 +97,17 @@ fun MainNavigation() {
                 )
             }
             composable(BottomNavItem.Tasks.route) { TaskListRoute() }
-            composable(BottomNavItem.Habits.route) { 
+            composable(BottomNavItem.Habits.route) {
                 HabitDashboardScreen(
                     onAddHabitClick = { /* Navigate to Add Habit */ },
                     onHabitClick = { /* Navigate to Habit Details */ }
                 )
             }
             composable(BottomNavItem.Focus.route) { FocusScreen() }
-            composable(BottomNavItem.Analytics.route) { 
+            composable(BottomNavItem.Analytics.route) {
                 AnalyticsScreen(onBackClick = { navController.popBackStack() })
             }
         }
     }
 }
 
-@Composable
-fun PlaceholderScreen(name: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-        Text(text = "$name Screen", style = MaterialTheme.typography.headlineLarge)
-    }
-}

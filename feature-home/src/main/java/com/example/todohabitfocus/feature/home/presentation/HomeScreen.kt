@@ -34,7 +34,6 @@ fun HomeRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToTasks: () -> Unit,
@@ -49,12 +48,11 @@ fun HomeScreen(
         visible = true
     }
 
-    Scaffold(
-        containerColor = Color(0xFFF8F9FA),
-        bottomBar = {
-            FloatingBottomNav()
-        }
-    ) { paddingValues ->
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+    ) {
         AnimatedVisibility(
             visible = visible,
             enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(initialOffsetY = { 40 })
@@ -62,7 +60,6 @@ fun HomeScreen(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
                     .padding(horizontal = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
@@ -116,47 +113,7 @@ fun HomeScreen(
                     WeeklyActivityChart(uiState.weeklyActivity)
                 }
                 
-                item { Spacer(modifier = Modifier.height(100.dp)) }
-            }
-        }
-    }
-}
-
-@Composable
-fun FloatingBottomNav() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier
-                .height(64.dp)
-                .fillMaxWidth(0.85f),
-            shape = RoundedCornerShape(32.dp),
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp,
-            shadowElevation = 8.dp
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = {}) { Icon(Icons.Default.Home, contentDescription = null, tint = MaterialTheme.colorScheme.primary) }
-                IconButton(onClick = {}) { Icon(Icons.Default.Task, contentDescription = null) }
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
-                }
-                IconButton(onClick = {}) { Icon(Icons.Default.History, contentDescription = null) }
-                IconButton(onClick = {}) { Icon(Icons.Default.Settings, contentDescription = null) }
+                item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
     }
