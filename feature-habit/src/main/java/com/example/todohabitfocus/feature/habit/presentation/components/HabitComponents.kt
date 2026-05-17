@@ -27,7 +27,7 @@ import com.example.todohabitfocus.feature.habit.presentation.HabitItemState
 import java.util.*
 
 @Composable
-fun HabitCard(
+fun PremiumHabitCard(
     habitState: HabitItemState,
     onToggle: () -> Unit,
     onClick: () -> Unit,
@@ -36,23 +36,19 @@ fun HabitCard(
     val habit = habitState.habit
     val isCompleted = habitState.isCompletedToday
     
-    val scale by animateFloatAsState(
-        targetValue = if (isCompleted) 1.02f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "scale"
-    )
+    val backgroundColor = if (isCompleted) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
+    } else {
+        getHabitColor(habit.name).copy(alpha = 0.15f)
+    }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .scale(scale)
             .clickable { onClick() },
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) 
-                             else PastelGreen
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -60,16 +56,18 @@ fun HabitCard(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Rounded Square Icon
             Box(
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    .size(60.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(backgroundColor),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = getHabitIcon(habit.name),
-                    fontSize = 24.sp
+                    fontSize = 28.sp,
+                    modifier = Modifier.animateContentSize()
                 )
             }
 
@@ -81,41 +79,73 @@ fun HabitCard(
                 Text(
                     text = habit.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Default.LocalFireDepartment,
                         contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = Color(0xFFFF9800)
+                        modifier = Modifier.size(16.dp),
+                        tint = if (habitState.currentStreak > 0) Color(0xFFFF9800) else MaterialTheme.colorScheme.outline
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${habitState.currentStreak} day streak",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
                     )
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // Weekly Mini Progress
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    repeat(7) { i ->
+                        Box(
+                            modifier = Modifier
+                                .size(width = 20.dp, height = 4.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (i < 3) getHabitColor(habit.name) // Mock completed days
+                                    else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                                )
+                        )
+                    }
                 }
             }
 
+            // Completion Toggle with Bounce
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(44.dp)
                     .clip(CircleShape)
                     .background(if (isCompleted) MaterialTheme.colorScheme.primary else Color.Transparent)
-                    .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
+                    .border(2.dp, if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), CircleShape)
                     .clickable { onToggle() },
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
-                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White)
+                    Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
                 }
             }
         }
     }
 }
+
+private fun getHabitColor(name: String): Color {
+    return when {
+        name.contains("water", ignoreCase = true) -> Color(0xFF64B5F6)
+        name.contains("read", ignoreCase = true) -> Color(0xFF81C784)
+        name.contains("exercise", ignoreCase = true) || name.contains("gym", ignoreCase = true) -> Color(0xFFFF8A65)
+        name.contains("meditate", ignoreCase = true) -> Color(0xFF9575CD)
+        name.contains("code", ignoreCase = true) || name.contains("study", ignoreCase = true) -> Color(0xFFFFD54F)
+        else -> Color(0xFF4DB6AC)
+    }
+}
+
 
 @Composable
 fun CalendarHeatmap(

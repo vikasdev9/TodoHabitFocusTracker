@@ -1,6 +1,7 @@
 package com.example.todohabitfocus.feature.analytics.presentation.components
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -70,19 +72,18 @@ fun LineChart(
 }
 
 @Composable
-fun BarChart(
+fun PremiumBarChart(
     data: List<ProductivityPoint>,
-    modifier: Modifier = Modifier,
-    barColor: Color = MaterialTheme.colorScheme.secondary
+    modifier: Modifier = Modifier
 ) {
     val animationProgress = remember { Animatable(0f) }
     LaunchedEffect(data) {
-        animationProgress.animateTo(1f, tween(1000))
+        animationProgress.animateTo(1f, tween(1200, easing = FastOutSlowInEasing))
     }
 
     Row(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Bottom
     ) {
         val maxVal = data.maxOf { it.value }.coerceAtLeast(1f)
@@ -93,16 +94,30 @@ fun BarChart(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.5f)
+                        .fillMaxWidth()
                         .fillMaxHeight(point.value / maxVal * animationProgress.value)
-                        .background(barColor, RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                        .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                                )
+                            )
+                        )
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(point.label, fontSize = 10.sp, color = Color.Gray)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = point.label.take(3),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }
 }
+
 
 @Composable
 fun ConsistencyCard(

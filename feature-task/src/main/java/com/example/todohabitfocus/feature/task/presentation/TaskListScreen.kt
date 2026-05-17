@@ -3,13 +3,14 @@ package com.example.todohabitfocus.feature.task.presentation
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.todohabitfocus.core.ui.components.ModernTextField
 import com.example.todohabitfocus.core.ui.components.ProgressRing
 import com.example.todohabitfocus.feature.task.presentation.components.TaskCard
 
@@ -40,74 +42,134 @@ fun TaskListScreen(
     viewModel: TaskViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedCategory by remember { mutableStateOf("All") }
+    val categories = listOf("All", "Personal", "Work", "Health", "Finance")
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF8F9FA))
-    ) {
-        if (uiState.isLoading) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-        } else if (uiState.tasks.isEmpty()) {
-            EmptyTasksState(modifier = Modifier.align(Alignment.Center))
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+    val filteredTasks = remember(uiState.tasks, searchQuery, selectedCategory) {
+        uiState.tasks.filter { task ->
+            (selectedCategory == "All" || task.category == selectedCategory) &&
+            (task.title.contains(searchQuery, ignoreCase = true) || 
+             task.description.contains(searchQuery, ignoreCase = true))
+        }
+    }
+
+    Scaffold(
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddTaskClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(20.dp),
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 4.dp)
             ) {
-                item {
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Text(
-                            "Task Dashboard",
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            "${uiState.tasks.count { !it.isCompleted }} pending today",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                Icon(Icons.Default.Add, contentDescription = "Add Task")
+            }
+        },
+        containerColor = Color(0xFFF8F9FA)
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            ) {
+                Text(
+                    "Task Management",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Search Bar
+                ModernTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = "Search tasks...",
+                    leadingIcon = Icons.Default.Search
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Filter Chips
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 8.dp)
+                ) {
+                    items(categories) { category ->
+                        FilterChip(
+                            selected = selectedCategory == category,
+                            onClick = { selectedCategory = category },
+                            label = { Text(category) },
+                            shape = CircleShape,
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primary,
+                                selectedLabelColor = Color.White,
+                                containerColor = Color.White
+                            ),
+                            border = FilterChipDefaults.filterChipBorder(
+                                enabled = true,
+                                selected = selectedCategory == category,
+                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
+                            )
                         )
                     }
                 }
+            }
 
-                item {
-                    TaskSummarySection(
-                        completedCount = uiState.tasks.count { it.isCompleted },
-                        totalCount = uiState.tasks.size
-                    )
+            if (uiState.isLoading && uiState.tasks.isEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 80.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        com.example.todohabitfocus.core.ui.components.ShimmerEffect(
+                            modifier = Modifier.fillMaxWidth().height(100.dp),
+                            shape = MaterialTheme.shapes.extraLarge
+                        )
+                    }
+                    items(5) {
+                        com.example.todohabitfocus.core.ui.components.ShimmerEffect(
+                            modifier = Modifier.fillMaxWidth().height(80.dp),
+                            shape = MaterialTheme.shapes.large
+                        )
+                    }
                 }
-                
-                item {
-                    Text(
-                        "Your Tasks",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-                
-                items(uiState.tasks, key = { it.id }) { task ->
-                    TaskCard(
-                        task = task,
-                        onClick = { onTaskClick(task.id) },
-                        onToggleComplete = { viewModel.toggleTaskCompletion(task) },
-                        onDelete = { viewModel.deleteTask(task) }
-                    )
+            } else if (!uiState.isLoading && filteredTasks.isEmpty()) {
+                EmptyTasksState(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 64.dp))
+            } else {
+                com.example.todohabitfocus.core.ui.components.PullToRefreshWrapper(
+                    isRefreshing = uiState.isLoading,
+                    onRefresh = { viewModel.loadTasks() }
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, bottom = 80.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item {
+                            TaskSummarySection(
+                                completedCount = uiState.tasks.count { it.isCompleted },
+                                totalCount = uiState.tasks.size
+                            )
+                        }
+                        
+                        items(filteredTasks, key = { it.id }) { task ->
+                            TaskCard(
+                                task = task,
+                                onClick = { onTaskClick(task.id) },
+                                onToggleComplete = { viewModel.toggleTaskCompletion(task) },
+                                onDelete = { viewModel.deleteTask(task) }
+                            )
+                        }
+                    }
                 }
             }
-        }
-        
-        FloatingActionButton(
-            onClick = onAddTaskClick,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = Color.White,
-            shape = MaterialTheme.shapes.large
-        ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Task")
         }
     }
 }

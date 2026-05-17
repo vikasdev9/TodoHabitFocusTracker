@@ -39,7 +39,7 @@ class HabitViewModel @Inject constructor(
         loadHabits()
     }
 
-    private fun loadHabits() {
+    fun loadHabits() {
         viewModelScope.launch {
             habitRepository.getHabits()
                 .flatMapLatest { habits ->

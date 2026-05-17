@@ -20,91 +20,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.todohabitfocus.feature.analytics.presentation.components.ConsistencyCard
 import com.example.todohabitfocus.feature.analytics.presentation.components.LineChart
+import com.example.todohabitfocus.feature.analytics.presentation.PremiumAnalyticsScreen
 
 @Composable
 fun AnalyticsScreen(
     onBackClick: () -> Unit,
     viewModel: AnalyticsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-            }
-            Text(
-                "Performance Analytics",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 8.dp)
-            )
-        }
-
-        Box(modifier = Modifier.weight(1f)) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else {
-                uiState.summary?.let { summary ->
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
-                        contentPadding = PaddingValues(bottom = 24.dp)
-                    ) {
-                        item {
-                            SummaryCards(
-                                summary.totalFocusHours,
-                                summary.tasksCompleted,
-                                summary.avgProductivityScore
-                            )
-                        }
-
-                        item {
-                            AnalyticsSection("Productivity Trend") {
-                                LineChart(
-                                    data = summary.weeklyTrends,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp)
-                                )
-                            }
-                        }
-
-                        item {
-                            AnalyticsSection("Habit Consistency") {
-                                summary.habitConsistencies.forEach { habit ->
-                                    ConsistencyCard(
-                                        habit.habitName,
-                                        habit.percentage,
-                                        Color(habit.color)
-                                    )
-                                }
-                            }
-                        }
-
-                        item {
-                            AnalyticsSection("Focus Hours") {
-                                LineChart(
-                                    data = summary.focusHourTrends,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(180.dp),
-                                    lineColor = Color(0xFFE91E63)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    PremiumAnalyticsScreen(
+        onBackClick = onBackClick,
+        viewModel = viewModel
+    )
 }
 
 @Composable

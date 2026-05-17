@@ -26,7 +26,7 @@ class HomeViewModel @Inject constructor(
         loadDashboardData()
     }
 
-    private fun loadDashboardData() {
+    fun loadDashboardData() {
         viewModelScope.launch {
             combine(
                 taskRepository.getTasks(),

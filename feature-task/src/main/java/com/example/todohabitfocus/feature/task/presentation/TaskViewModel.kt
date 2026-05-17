@@ -33,7 +33,7 @@ class TaskViewModel @Inject constructor(
         loadTasks()
     }
 
-    private fun loadTasks() {
+    fun loadTasks() {
         viewModelScope.launch {
             getTasksUseCase()
                 .onStart { _uiState.update { it.copy(isLoading = true) } }

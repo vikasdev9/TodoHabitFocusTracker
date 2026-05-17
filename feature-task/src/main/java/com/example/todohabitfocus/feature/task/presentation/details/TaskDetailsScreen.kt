@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -67,59 +68,96 @@ fun TaskDetailsScreen(
                     .padding(paddingValues)
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(24.dp),
-                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                // Header with Status and Priority
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                // Header Image/Color Area
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                        .background(
+                            when(currentTask.priority) {
+                                Priority.HIGH -> Color(0xFFFDEDF2)
+                                Priority.MEDIUM -> Color(0xFFFEF5E7)
+                                Priority.LOW -> Color(0xFFE8F1FF)
+                            }
+                        ),
+                    contentAlignment = Alignment.BottomStart
                 ) {
-                    StatusBadge(isCompleted = currentTask.isCompleted)
-                    PriorityBadge(priority = currentTask.priority)
+                    Row(
+                        modifier = Modifier.padding(24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatusBadge(isCompleted = currentTask.isCompleted)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        PriorityBadge(priority = currentTask.priority)
+                    }
                 }
 
-                Text(
-                    text = currentTask.title,
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    CategoryChip(category = currentTask.category)
-                    currentTask.dueDate?.let { DateChip(timestamp = it) }
-                }
-
-                DetailSection(
-                    icon = Icons.Default.Description,
-                    title = "Description",
-                    content = if (currentTask.description.isEmpty()) "No description provided." else currentTask.description
-                )
-
-                DetailSection(
-                    icon = Icons.Default.AccessTime,
-                    title = "Created At",
-                    content = SimpleDateFormat("MMMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(currentTask.createdAt))
-                )
-
-                Spacer(modifier = Modifier.weight(1f))
-                
-                Button(
-                    onClick = { viewModel.toggleTaskCompletion(currentTask) },
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                    shape = MaterialTheme.shapes.large,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (currentTask.isCompleted) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
-                    )
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(28.dp)
                 ) {
-                    Icon(
-                        if (currentTask.isCompleted) Icons.Default.Replay else Icons.Default.Check,
-                        contentDescription = null
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = currentTask.title,
+                            style = MaterialTheme.typography.headlineLarge,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            CategoryChip(category = currentTask.category)
+                            currentTask.dueDate?.let { DateChip(timestamp = it) }
+                        }
+                    }
+
+                    DetailSection(
+                        icon = Icons.Default.Description,
+                        title = "Description",
+                        content = if (currentTask.description.isEmpty()) "No description provided." else currentTask.description
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(if (currentTask.isCompleted) "Reopen Task" else "Complete Task")
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            DetailSection(
+                                icon = Icons.Default.AccessTime,
+                                title = "Created",
+                                content = SimpleDateFormat("MMM dd", Locale.getDefault()).format(Date(currentTask.createdAt))
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f)) {
+                            DetailSection(
+                                icon = Icons.Default.Group,
+                                title = "Assigned to",
+                                content = "You"
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(40.dp))
+                    
+                    Button(
+                        onClick = { viewModel.toggleTaskCompletion(currentTask) },
+                        modifier = Modifier.fillMaxWidth().height(60.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (currentTask.isCompleted) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
+                        ),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
+                    ) {
+                        Icon(
+                            if (currentTask.isCompleted) Icons.Default.Replay else Icons.Default.Check,
+                            contentDescription = null
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            if (currentTask.isCompleted) "Reopen Task" else "Complete Task",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

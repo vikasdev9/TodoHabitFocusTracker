@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -17,7 +14,7 @@ import androidx.navigation.compose.*
 import com.example.todohabitfocus.feature.analytics.presentation.AnalyticsScreen
 import com.example.todohabitfocus.feature.focus.presentation.FocusScreen
 import com.example.todohabitfocus.feature.habit.presentation.dashboard.HabitDashboardScreen
-import com.example.todohabitfocus.feature.home.presentation.HomeRoute
+import com.example.todohabitfocus.feature.home.presentation.PremiumDashboardRoute
 import com.example.todohabitfocus.feature.task.presentation.TaskListRoute
 
 @Composable
@@ -49,28 +46,39 @@ fun MainNavigation() {
                     }
                 }
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
+        }
     ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = BottomNavItem.Home.route,
             modifier = Modifier.padding(innerPadding),
             enterTransition = {
-                fadeIn(animationSpec = tween(400)) + slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioLowBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
+                fadeIn(animationSpec = tween(300)) + slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = tween(300)
                 )
             },
             exitTransition = {
-                fadeOut(animationSpec = tween(200))
+                fadeOut(animationSpec = tween(300)) + slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.Start,
+                    animationSpec = tween(300)
+                )
+            },
+            popEnterTransition = {
+                fadeIn(animationSpec = tween(300)) + slideIntoContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = tween(300)
+                )
+            },
+            popExitTransition = {
+                fadeOut(animationSpec = tween(300)) + slideOutOfContainer(
+                    AnimatedContentTransitionScope.SlideDirection.End,
+                    animationSpec = tween(300)
+                )
             }
         ) {
             composable(BottomNavItem.Home.route) {
-                HomeRoute(
+                PremiumDashboardRoute(
                     onNavigateToTasks = { navController.navigate(BottomNavItem.Tasks.route) },
                     onNavigateToHabits = { navController.navigate(BottomNavItem.Habits.route) },
                     onNavigateToFocus = { navController.navigate(BottomNavItem.Focus.route) }
@@ -99,57 +107,34 @@ fun AppBottomBar(
 ) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 4.dp,
-        modifier = Modifier.height(84.dp)
+        tonalElevation = 0.dp // Clean white look, no elevation shadow
     ) {
         items.forEach { item ->
             val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
             
-            val iconScale by animateFloatAsState(
-                targetValue = if (isSelected) 1.2f else 1f,
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessLow
-                ),
-                label = "iconScale"
-            )
-
-            val itemColor by animateColorAsState(
-                targetValue = if (isSelected) MaterialTheme.colorScheme.primary 
-                              else MaterialTheme.colorScheme.onSurfaceVariant,
-                animationSpec = tween(durationMillis = 300),
-                label = "itemColor"
-            )
-
             NavigationBarItem(
                 selected = isSelected,
                 onClick = { onNavigate(item.route) },
                 icon = {
                     Icon(
                         imageVector = item.icon,
-                        contentDescription = item.label,
-                        modifier = Modifier.scale(iconScale),
-                        tint = itemColor
+                        contentDescription = item.label
                     )
                 },
                 label = {
                     Text(
                         text = item.label,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
-                        color = itemColor
+                        style = MaterialTheme.typography.labelMedium
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                     selectedIconColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         }
     }
 }
-
-

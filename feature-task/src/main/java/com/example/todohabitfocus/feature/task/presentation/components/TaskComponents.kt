@@ -85,7 +85,17 @@ fun TaskCard(
             }
         }
 
-        val scale by animateFloatAsState(if (dismissState.dismissDirection != null) 0.95f else 1f, label = "scale")
+        val scale by animateFloatAsState(
+            targetValue = if (dismissState.dismissDirection != null) 0.95f else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+            label = "scale"
+        )
+
+        val elevation by animateDpAsState(
+            targetValue = if (dismissState.dismissDirection != null) 0.dp else 2.dp,
+            animationSpec = tween(300),
+            label = "elevation"
+        )
 
         Card(
             modifier = Modifier
@@ -94,7 +104,7 @@ fun TaskCard(
                 .clickable { onClick() },
             shape = MaterialTheme.shapes.large,
             colors = CardDefaults.cardColors(containerColor = backgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = elevation)
         ) {
             Row(
                 modifier = Modifier

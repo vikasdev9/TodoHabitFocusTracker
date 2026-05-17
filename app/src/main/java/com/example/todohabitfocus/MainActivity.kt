@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.example.todohabitfocus.core.designsystem.theme.TodoHabitFocusTheme
+import com.example.todohabitfocus.core.designsystem.theme.AppTheme
 import com.example.todohabitfocus.navigation.MainNavigation
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            TodoHabitFocusTheme {
+            AppTheme {
                 MainNavigation()
             }
         }
