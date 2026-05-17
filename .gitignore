@@ -1,0 +1,75 @@
+# Gradle
+.gradle/
+build/
+
+# Local configuration
+local.properties
+
+# Android Studio
+.idea/
+*.iml
+
+# Keystore
+*.jks
+*.keystore
+
+# Logs
+*.log
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Kotlin
+.kotlin/
+
+# Generated
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Firebase
+google-services.json
+
+# Secrets
+secrets.properties
+.env
+
+# Mac
+*.swp
+
+# Build outputs
+/app/release/
+/app/debug/
+
+# Navigation Safe Args
+.navigation/
+
+# Room
+schemas/
+
+# Temporary
+tmp/
+temp/
+
+# Signing
+signing.properties
+
+# NDK
+obj/
+
+# Compose
+compose_compiler/
+
+# IntelliJ
+out/
+
+# KSP
+.ksp/
+
+# Generated APK/AAB
+*.apk
+*.aab
+
+# Crashlytics
+com_crashlytics_export_strings.xml
