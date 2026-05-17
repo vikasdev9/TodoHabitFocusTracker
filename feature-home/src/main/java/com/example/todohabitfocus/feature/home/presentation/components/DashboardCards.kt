@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.todohabitfocus.core.designsystem.theme.PastelBlue
+import com.example.todohabitfocus.core.designsystem.theme.PastelPurple
 import com.example.todohabitfocus.core.domain.model.Task
 import com.example.todohabitfocus.feature.home.presentation.HabitStreak
 
@@ -31,7 +33,7 @@ fun GreetingSection(userName: String) {
         Text(
             text = "$userName!",
             style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onSurface
         )
     }
@@ -42,16 +44,17 @@ fun ProductivityScoreCard(score: Int) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+            .height(130.dp),
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.horizontalGradient(
-                        colors = listOf(Color(0xFF6366F1), Color(0xFFA855F7))
+                        colors = listOf(Color(0xFF4F46E5), Color(0xFF7C3AED))
                     )
                 )
                 .padding(24.dp)
@@ -62,11 +65,15 @@ fun ProductivityScoreCard(score: Int) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text("Productivity Score", color = Color.White.copy(alpha = 0.8f))
+                    Text(
+                        "Productivity Score",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.8f)
+                    )
                     Text(
                         "$score%",
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineLarge,
+                        fontWeight = FontWeight.ExtraBold,
                         color = Color.White
                     )
                 }
@@ -74,19 +81,21 @@ fun ProductivityScoreCard(score: Int) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(80.dp)
-                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                        .size(72.dp)
+                        .background(Color.White.copy(alpha = 0.15f), CircleShape)
                 ) {
                     CircularProgressIndicator(
-                        progress = score / 100f,
+                        progress = { score / 100f },
                         color = Color.White,
-                        strokeWidth = 8.dp,
-                        modifier = Modifier.size(60.dp)
+                        strokeWidth = 6.dp,
+                        modifier = Modifier.size(56.dp),
+                        trackColor = Color.White.copy(alpha = 0.1f)
                     )
                     Icon(
                         Icons.Default.TrendingUp,
                         contentDescription = null,
-                        tint = Color.White
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
@@ -120,8 +129,9 @@ fun UpcomingTaskCard(task: Task) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = PastelBlue),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -130,7 +140,7 @@ fun UpcomingTaskCard(task: Task) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape),
+                    .background(Color.White.copy(alpha = 0.5f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -142,17 +152,21 @@ fun UpcomingTaskCard(task: Task) {
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(task.title, fontWeight = FontWeight.Bold)
+                Text(
+                    task.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold
+                )
                 Text(
                     task.category,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 "Today",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
         }
@@ -170,10 +184,10 @@ fun HabitStreakItem(streak: HabitStreak) {
         Box(
             modifier = Modifier
                 .size(70.dp)
-                .clip(RoundedCornerShape(20.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .background(
                     if (streak.isCompletedToday) MaterialTheme.colorScheme.primary 
-                    else MaterialTheme.colorScheme.surfaceVariant
+                    else PastelPurple
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -186,7 +200,7 @@ fun HabitStreakItem(streak: HabitStreak) {
                 )
                 Text(
                     "${streak.streakCount}",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = if (streak.isCompletedToday) Color.White else MaterialTheme.colorScheme.onSurface,
                     fontSize = 18.sp
                 )
@@ -195,8 +209,8 @@ fun HabitStreakItem(streak: HabitStreak) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             streak.habit.name,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
             maxLines = 1
         )
     }
@@ -212,17 +226,23 @@ fun StatCard(
 ) {
     Card(
         modifier = modifier.height(110.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.1f))
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp).fillMaxSize(),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(icon, contentDescription = null, tint = color)
+            Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             Column {
-                Text(value, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                Text(title, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+                Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

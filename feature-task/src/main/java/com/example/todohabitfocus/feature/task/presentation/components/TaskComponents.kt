@@ -75,10 +75,14 @@ fun TaskCard(
             }
         }
     ) {
-        val backgroundColor = when (task.priority) {
-            Priority.HIGH -> Color(0xFFFFEBEE) // Soft Red
-            Priority.MEDIUM -> Color(0xFFFFF8E1) // Soft Amber
-            Priority.LOW -> Color(0xFFE3F2FD) // Soft Blue
+        val backgroundColor = if (task.isCompleted) {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        } else {
+            when (task.priority) {
+                Priority.HIGH -> Color(0xFFFDEDF2) // Soft Pastel Red/Pink
+                Priority.MEDIUM -> Color(0xFFFEF5E7) // Soft Pastel Amber
+                Priority.LOW -> Color(0xFFE8F1FF) // Soft Pastel Blue
+            }
         }
 
         val scale by animateFloatAsState(if (dismissState.dismissDirection != null) 0.95f else 1f, label = "scale")
@@ -90,7 +94,7 @@ fun TaskCard(
                 .clickable { onClick() },
             shape = MaterialTheme.shapes.large,
             colors = CardDefaults.cardColors(containerColor = backgroundColor),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -110,16 +114,16 @@ fun TaskCard(
                 ) {
                     Text(
                         text = task.title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null,
                         color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.onSurface
                     )
                     
-                    if (task.description.isNotEmpty()) {
+                    if (task.description.isNotEmpty() && !task.isCompleted) {
                         Text(
                             text = task.description,
-                            style = MaterialTheme.typography.bodySmall,
+                            style = MaterialTheme.typography.labelMedium,
                             maxLines = 1,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                         )
@@ -137,7 +141,9 @@ fun TaskCard(
                     }
                 }
 
-                TeamAvatars()
+                if (!task.isCompleted) {
+                    PriorityIndicator(priority = task.priority)
+                }
             }
         }
     }

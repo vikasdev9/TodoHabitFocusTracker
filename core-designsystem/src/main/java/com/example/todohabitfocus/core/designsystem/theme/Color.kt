@@ -65,3 +65,10 @@ val AmoledBackground = Color(0xFF000000)
 val AmoledSurface = Color(0xFF000000)
 val AmoledOnBackground = Color(0xFFFFFFFF)
 val AmoledOnSurface = Color(0xFFFFFFFF)
+
+// Premium Modern Pastel Variants
+val PastelBlue = Color(0xFFE8F1FF)
+val PastelGreen = Color(0xFFE9F7EF)
+val PastelPurple = Color(0xFFF4EBFD)
+val PastelOrange = Color(0xFFFEF5E7)
+val PastelPink = Color(0xFFFDEDF2)

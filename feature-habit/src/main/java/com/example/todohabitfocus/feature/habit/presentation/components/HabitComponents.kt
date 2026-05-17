@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.todohabitfocus.core.designsystem.theme.PastelGreen
 import com.example.todohabitfocus.feature.habit.presentation.HabitItemState
 import java.util.*
 
@@ -46,16 +47,12 @@ fun HabitCard(
             .fillMaxWidth()
             .scale(scale)
             .clickable { onClick() },
-        shape = RoundedCornerShape(24.dp),
+        shape = MaterialTheme.shapes.large,
         colors = CardDefaults.cardColors(
             containerColor = if (isCompleted) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) 
-                             else MaterialTheme.colorScheme.surface
+                             else PastelGreen
         ),
-        border = BorderStroke(
-            1.dp, 
-            if (isCompleted) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) 
-            else MaterialTheme.colorScheme.outline.copy(alpha = 0.1f)
-        )
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier

@@ -33,7 +33,6 @@ fun TaskListRoute(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(
     onAddTaskClick: () -> Unit,
@@ -42,83 +41,73 @@ fun TaskListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            LargeTopAppBar(
-                title = { 
-                    Column {
-                        Text("Task Dashboard", fontWeight = FontWeight.Bold)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF8F9FA))
+    ) {
+        if (uiState.isLoading) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        } else if (uiState.tasks.isEmpty()) {
+            EmptyTasksState(modifier = Modifier.align(Alignment.Center))
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                item {
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Text(
+                            "Task Dashboard",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                         Text(
                             "${uiState.tasks.count { !it.isCompleted }} pending today",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                },
-                actions = {
-                    IconButton(onClick = { /* Search */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                    IconButton(onClick = { viewModel.syncTasks() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Sync")
-                    }
-                },
-                colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = Color.Transparent,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddTaskClick,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.White,
-                shape = MaterialTheme.shapes.large,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Task")
-            }
-        },
-        containerColor = Color(0xFFF8F9FA)
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues).fillMaxSize()) {
-            if (uiState.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-            } else if (uiState.tasks.isEmpty()) {
-                EmptyTasksState(modifier = Modifier.align(Alignment.Center))
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item {
-                        TaskSummarySection(
-                            completedCount = uiState.tasks.count { it.isCompleted },
-                            totalCount = uiState.tasks.size
-                        )
-                    }
-                    
-                    item {
-                        Text(
-                            "Your Tasks",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                    }
-                    
-                    items(uiState.tasks, key = { it.id }) { task ->
-                        TaskCard(
-                            task = task,
-                            onClick = { onTaskClick(task.id) },
-                            onToggleComplete = { viewModel.toggleTaskCompletion(task) },
-                            onDelete = { viewModel.deleteTask(task) }
-                        )
-                    }
+                }
+
+                item {
+                    TaskSummarySection(
+                        completedCount = uiState.tasks.count { it.isCompleted },
+                        totalCount = uiState.tasks.size
+                    )
+                }
+                
+                item {
+                    Text(
+                        "Your Tasks",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                
+                items(uiState.tasks, key = { it.id }) { task ->
+                    TaskCard(
+                        task = task,
+                        onClick = { onTaskClick(task.id) },
+                        onToggleComplete = { viewModel.toggleTaskCompletion(task) },
+                        onDelete = { viewModel.deleteTask(task) }
+                    )
                 }
             }
+        }
+        
+        FloatingActionButton(
+            onClick = onAddTaskClick,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = Color.White,
+            shape = MaterialTheme.shapes.large
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Task")
         }
     }
 }
