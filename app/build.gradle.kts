@@ -58,6 +58,7 @@ dependencies {
     implementation(project(":feature-focus"))
     implementation(project(":feature-analytics"))
     implementation(project(":feature-settings"))
+    implementation(project(":core-preferences"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -71,6 +72,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     
     implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     implementation(libs.hilt.work)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.work.compiler)

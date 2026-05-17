@@ -6,9 +6,14 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.user.UserInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 class AuthRepositoryImpl @Inject constructor(
@@ -17,6 +22,14 @@ class AuthRepositoryImpl @Inject constructor(
 
     private val _currentUser = MutableStateFlow<UserInfo?>(null)
     override val currentUser: StateFlow<UserInfo?> = _currentUser.asStateFlow()
+    
+    override val isLoggedIn: StateFlow<Boolean> = _currentUser
+        .map { it != null }
+        .stateIn(
+            scope = CoroutineScope(Dispatchers.Main),
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     init {
         _currentUser.value = supabaseClient.auth.currentUserOrNull()
