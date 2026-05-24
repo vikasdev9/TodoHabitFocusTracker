@@ -35,12 +35,14 @@ private val CardGreen = Color(0xFFD9F5E5)
 fun PremiumDashboardRoute(
     onNavigateToTasks: () -> Unit = {},
     onNavigateToHabits: () -> Unit = {},
-    onNavigateToFocus: () -> Unit = {}
+    onNavigateToFocus: () -> Unit = {},
+    onNavigateToAddEditTask: (String?) -> Unit = {}
 ) {
     PremiumDashboardScreen(
         onNavigateToTasks = onNavigateToTasks,
         onNavigateToHabits = onNavigateToHabits,
-        onNavigateToFocus = onNavigateToFocus
+        onNavigateToFocus = onNavigateToFocus,
+        onNavigateToAddEditTask = onNavigateToAddEditTask
     )
 }
 
@@ -49,6 +51,7 @@ fun PremiumDashboardScreen(
     onNavigateToTasks: () -> Unit,
     onNavigateToHabits: () -> Unit,
     onNavigateToFocus: () -> Unit,
+    onNavigateToAddEditTask: (String?) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     Scaffold(
@@ -76,7 +79,7 @@ fun PremiumDashboardScreen(
                     userName = "Alex Morgan",
                     onSettingsClick = {},
                     onNotificationsClick = {},
-                    onAddClick = {}
+                    onAddClick = { onNavigateToAddEditTask(null) }
                 )
             }
 

@@ -2,15 +2,23 @@ package com.example.todohabitfocus.feature.focus.presentation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Coffee
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.*
@@ -18,9 +26,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -30,349 +44,406 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun FocusScreen(
-    viewModel: FocusViewModel = hiltViewModel()
-) {
-    val uiState by viewModel.uiState.collectAsState()
-    var visible by remember { mutableStateOf(false) }
+fun FocusScreen() {
 
-    LaunchedEffect(Unit) {
-        visible = true
-    }
-    
-    val backgroundBrush = Brush.verticalGradient(
-        colors = listOf(Color(0xFFE0F2FE), Color(0xFFF0F9FF)) // Calming Soft Blue
+    val infiniteTransition = rememberInfiniteTransition(label = "breathing")
+
+    // BREATHING SCALE
+    val breathingScale by infiniteTransition.animateFloat(
+        initialValue = 0.96f,
+        targetValue = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 2400,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "breathingScale"
     )
+
+    // OUTER GLOW
+    val glowScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 2400,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowScale"
+    )
+
+    val modes = remember {
+        listOf(
+            FocusModeUi(
+                title = "Pomodoro",
+                duration = "25 min",
+                icon = Icons.Default.Psychology,
+                selected = true
+            ),
+            FocusModeUi(
+                title = "Deep work",
+                duration = "50 min",
+                icon = Icons.Default.Bolt,
+                selected = false
+            ),
+            FocusModeUi(
+                title = "Short break",
+                duration = "5 min",
+                icon = Icons.Default.Coffee,
+                selected = false
+            ),
+            FocusModeUi(
+                title = "Long break",
+                duration = "15 min",
+                icon = Icons.Default.DarkMode,
+                selected = false
+            )
+        )
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F8FC))
+            .padding(horizontal = 20.dp),
+        contentPadding = PaddingValues(
+            top = 20.dp,
+            bottom = 28.dp
+        ),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        // TITLE
+        item {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Focus session",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color(0xFF7B8190)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Stay in flow",
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = Color(0xFF081225)
+            )
+        }
+
+        // TIMER
+        item {
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Box(
+                modifier = Modifier.size(360.dp),
+                contentAlignment = Alignment.Center
+            ) {
+
+                // OUTER BREATHING GLOW
+                Box(
+                    modifier = Modifier
+                        .size(300.dp)
+                        .scale(glowScale)
+                        .clip(CircleShape)
+                        .background(
+                            Color(0xFFEEF1FF)
+                        )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(260.dp)
+                        .scale(glowScale * 0.96f)
+                        .clip(CircleShape)
+                        .background(
+                            Color(0xFFF3F5FF)
+                        )
+                )
+
+                // RING
+                Canvas(
+                    modifier = Modifier
+                        .size(260.dp)
+                        .scale(breathingScale)
+                ) {
+
+                    drawArc(
+                        color = Color(0xFFEAEFFD),
+                        startAngle = 0f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        style = Stroke(
+                            width = 14.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+
+                    drawArc(
+                        color = Color(0xFF172B6A),
+                        startAngle = -90f,
+                        sweepAngle = 220f,
+                        useCenter = false,
+                        style = Stroke(
+                            width = 14.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
+
+                // CENTER TEXT
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Text(
+                        text = "POMODORO",
+                        letterSpacing = 4.sp,
+                        fontSize = 16.sp,
+                        color = Color(0xFF7B8190)
+                    )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    Text(
+                        text = "25:00",
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFF081225)
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "Session 3 of 6",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFF7B8190)
+                    )
+                }
+            }
+        }
+
+        // CONTROLS
+        item {
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                // RESET
+                CircleActionButton(
+                    icon = Icons.Default.Refresh,
+                    size = 60.dp,
+                    background = Color.White,
+                    tint = Color(0xFF081225)
+                )
+
+                // PLAY
+                Box(
+                    modifier = Modifier
+                        .size(88.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFF172B6A))
+                        .shadow(
+                            elevation = 24.dp,
+                            shape = CircleShape,
+                            spotColor = Color(0x33172B6A)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+
+                // ADD TIME
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Text(
+                        text = "+5m",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color(0xFF081225)
+                    )
+                }
+            }
+        }
+
+        // MODES
+        item {
+
+            Spacer(modifier = Modifier.height(50.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ) {
+
+                Text(
+                    text = "Modes",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF6B7280)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+        }
+
+        // MODES GRID
+        item {
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.height(190.dp),
+                userScrollEnabled = false,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                items(
+                    items = modes,
+                    key = { it.title }
+                ) { mode ->
+
+                    FocusModeCard(mode)
+                }
+            }
+        }
+    }
+}
+
+@Immutable
+data class FocusModeUi(
+    val title: String,
+    val duration: String,
+    val icon: ImageVector,
+    val selected: Boolean
+)
+
+@Composable
+fun FocusModeCard(
+    mode: FocusModeUi
+) {
+
+    Card(
+        shape = RoundedCornerShape(32.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = if (mode.selected)
+                Color(0xFF172B6A)
+            else
+                Color.White
+        ),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (mode.selected)
+                            Color.White.copy(alpha = 0.12f)
+                        else
+                            Color(0xFFE3ECFF)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Icon(
+                    imageVector = mode.icon,
+                    contentDescription = null,
+                    tint = if (mode.selected)
+                        Color.White
+                    else
+                        Color(0xFF172B6A),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column {
+
+                Text(
+                    text = mode.title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (mode.selected)
+                        Color.White
+                    else
+                        Color(0xFF081225)
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = mode.duration,
+                    fontSize = 14.sp,
+                    color = if (mode.selected)
+                        Color.White.copy(alpha = 0.7f)
+                    else
+                        Color(0xFF7B8190)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CircleActionButton(
+    icon: ImageVector,
+    size: Dp,
+    background: Color,
+    tint: Color
+) {
 
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundBrush)
+            .size(size)
+            .clip(CircleShape)
+            .background(background),
+        contentAlignment = Alignment.Center
     ) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(animationSpec = tween(1000)) + slideInVertically(initialOffsetY = { 40 })
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 32.dp)
-            ) {
-                item {
-                    FocusHeader()
-                }
-                
-                item {
-                    Spacer(modifier = Modifier.height(48.dp))
 
-                    val totalDuration = 25 * 60 * 1000L // Simplified for now as currentSessionType was missing
-
-                    val progress = if (uiState.isRunning) {
-                         uiState.timeLeftMillis.toFloat() / totalDuration
-                    } else 1f
-
-                    CircularTimer(
-                        progress = progress,
-                        timeLeft = formatTime(uiState.timeLeftMillis),
-                        isRunning = uiState.isRunning
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(48.dp))
-                    SessionTypeSelector(
-                        selectedType = uiState.currentType.name,
-                        onTypeSelected = { 
-                            when(it) {
-                                "POMODORO" -> viewModel.startPomodoro()
-                                "SHORT_BREAK" -> viewModel.startShortBreak()
-                                // "LONG_BREAK" -> viewModel.startLongBreak()
-                            }
-                        }
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(48.dp))
-                    FocusControls(
-                        isRunning = uiState.isRunning,
-                        onStart = { viewModel.startPomodoro() },
-                        onStop = { viewModel.stopTimer() }
-                    )
-                }
-                
-                item {
-                    Spacer(modifier = Modifier.height(48.dp))
-                    FocusStatsSummary(totalFocusTime = uiState.totalFocusTime)
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Focus History",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF1E293B)
-                        )
-                        TextButton(onClick = { /* Navigate to History */ }) {
-                            Text("See All")
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-                items(uiState.sessions.take(3)) { session ->
-                    PremiumSessionItem(session)
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-                
-                item { Spacer(modifier = Modifier.height(40.dp)) }
-            }
-        }
-    }
-}
-
-@Composable
-fun FocusHeader() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "Stay Focused",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF0369A1)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(34.dp)
         )
-        Text(
-            text = "Find your inner calm and productivity",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color(0xFF0C4A6E).copy(alpha = 0.6f)
-        )
-    }
-}
-
-@Composable
-fun SessionTypeSelector(selectedType: String, onTypeSelected: (String) -> Unit) {
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.5f))
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        listOf("POMODORO", "SHORT_BREAK", "LONG_BREAK").forEach { type ->
-            val isSelected = selectedType == type
-            val label = type.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() }
-            
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(if (isSelected) Color.White else Color.Transparent)
-                    .clickable { onTypeSelected(type) }
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) Color(0xFF0369A1) else Color(0xFF0369A1).copy(alpha = 0.6f),
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun FocusControls(isRunning: Boolean, onStart: () -> Unit, onStop: () -> Unit) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (!isRunning) {
-            ExtendedFloatingActionButton(
-                onClick = onStart,
-                containerColor = Color(0xFF0284C7),
-                contentColor = Color.White,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.width(160.dp)
-            ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Start Focus", fontWeight = FontWeight.Bold)
-            }
-        } else {
-            ExtendedFloatingActionButton(
-                onClick = onStop,
-                containerColor = Color(0xFFEF4444),
-                contentColor = Color.White,
-                shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.width(160.dp)
-            ) {
-                Icon(Icons.Default.Stop, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("End Session", fontWeight = FontWeight.Bold)
-            }
-        }
-    }
-}
-
-@Composable
-fun FocusStatsSummary(totalFocusTime: Long) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(32.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(24.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = "Total Focus Today",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFF64748B),
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = formatDuration(totalFocusTime),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = Color(0xFF0369A1),
-                    fontWeight = FontWeight.ExtraBold
-                )
-            }
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(Color(0xFFE0F2FE), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.Timer, contentDescription = null, tint = Color(0xFF0369A1))
-            }
-        }
-    }
-}
-
-@Composable
-fun PremiumSessionItem(session: FocusSession) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.6f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color(0xFFBAE6FD)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("🧘", fontSize = 24.sp)
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = session.type.name.replace("_", " ").lowercase().replaceFirstChar { it.uppercase() },
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFF1E293B),
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(session.startTime)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF64748B)
-                )
-            }
-            
-            Text(
-                text = "+${session.durationMillis / 60000} min",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF0284C7),
-                fontWeight = FontWeight.ExtraBold
-            )
-        }
-    }
-}
-
-@Composable
-fun SessionItem(session: FocusSession) {
-    Surface(
-        color = Color.White.copy(alpha = 0.03f),
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = session.type.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(session.startTime)),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.4f)
-                )
-            }
-            Text(
-                text = "${session.durationMillis / 60000}m",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF3F8CFF),
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-@Composable
-fun LargeIconButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    onClick: () -> Unit,
-    containerColor: Color
-) {
-    FilledIconButton(
-        onClick = onClick,
-        modifier = Modifier.size(80.dp),
-        shape = CircleShape,
-        colors = IconButtonDefaults.filledIconButtonColors(
-            containerColor = containerColor,
-            contentColor = Color.White
-        )
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(40.dp))
-    }
-}
-
-private fun formatTime(millis: Long): String {
-    val totalSeconds = millis / 1000
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "%02d:%02d".format(minutes, seconds)
-}
-
-private fun formatDuration(millis: Long): String {
-    val minutes = millis / (1000 * 60)
-    return if (minutes < 60) {
-        "${minutes}m"
-    } else {
-        "${minutes / 60}h ${minutes % 60}m"
     }
 }

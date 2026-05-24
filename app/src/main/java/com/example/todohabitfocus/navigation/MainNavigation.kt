@@ -12,13 +12,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import com.example.todohabitfocus.feature.analytics.presentation.AnalyticsScreen
 import com.example.todohabitfocus.feature.focus.presentation.FocusScreen
+import com.example.todohabitfocus.feature.habit.presentation.add_edit.AddEditHabitScreen
 import com.example.todohabitfocus.feature.habit.presentation.dashboard.HabitDashboardScreen
 import com.example.todohabitfocus.feature.home.presentation.PremiumDashboardRoute
 import com.example.todohabitfocus.feature.onboarding.presentation.OnboardingScreen
 import com.example.todohabitfocus.feature.task.presentation.TaskListRoute
+import com.example.todohabitfocus.feature.task.presentation.add_edit.AddEditTaskScreen
 import com.example.todohabitfocus.presentation.appstart.AppStartUiState
 import com.example.todohabitfocus.presentation.appstart.AppStartViewModel
 import com.example.todohabitfocus.presentation.appstart.SplashScreen
@@ -110,14 +114,42 @@ fun MainNavigation(
                         PremiumDashboardRoute(
                             onNavigateToTasks = { navController.navigate(BottomNavItem.Tasks.route) },
                             onNavigateToHabits = { navController.navigate(BottomNavItem.Habits.route) },
-                            onNavigateToFocus = { navController.navigate(BottomNavItem.Focus.route) }
+                            onNavigateToFocus = { navController.navigate(BottomNavItem.Focus.route) },
+                            onNavigateToAddEditTask = { taskId ->
+                                val route = if (taskId != null) "add_edit_task?taskId=$taskId" else "add_edit_task"
+                                navController.navigate(route)
+                            }
                         )
                     }
+
+                    composable(
+                        route = "add_edit_task?taskId={taskId}",
+                        arguments = listOf(
+                            navArgument("taskId") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val taskId = backStackEntry.arguments?.getString("taskId")
+                        AddEditTaskScreen(
+                            taskId = taskId,
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+
                     composable(BottomNavItem.Tasks.route) { TaskListRoute() }
                     composable(BottomNavItem.Habits.route) {
                         HabitDashboardScreen(
-                            onAddHabitClick = { /* Navigate to Add Habit */ },
+                            onAddHabitClick = { navController.navigate("add_edit_habit") },
                             onHabitClick = { /* Navigate to Habit Details */ }
+                        )
+                    }
+
+                    composable("add_edit_habit") {
+                        AddEditHabitScreen(
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
                     composable(BottomNavItem.Focus.route) { FocusScreen() }

@@ -2,6 +2,7 @@ package com.example.todohabitfocus.feature.task.presentation.add_edit
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -24,7 +25,7 @@ import com.example.todohabitfocus.feature.task.presentation.TaskViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskScreen(
     taskId: String? = null,
@@ -187,9 +188,9 @@ fun AddEditTaskScreen(
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Category", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
                 val categories = listOf("Personal", "Work", "Health", "Finance")
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     categories.forEach { c ->
                         val isSelected = category == c
