@@ -41,9 +41,9 @@ fun AppButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(50.dp),
         enabled = enabled && !isLoading,
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(30.dp),
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor,

@@ -1,7 +1,7 @@
 package com.example.todohabitfocus.feature.onboarding.presentation
 
-import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,16 +22,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.todohabitfocus.core.designsystem.theme.AppTheme
 import com.example.todohabitfocus.core.ui.components.AppButton
-import com.example.todohabitfocus.core.ui.components.ProgressRing
-import com.example.todohabitfocus.core.ui.components.TaskCard
 import kotlinx.coroutines.launch
 
 @Composable
@@ -42,22 +41,10 @@ fun OnboardingScreen(
     val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
 
-    val colors = listOf(
-        Color(0xFFFFEFEF), // Soft Red
-        Color(0xFFEFFFFD), // Soft Cyan
-        Color(0xFFF0F0FF)  // Soft Blue
-    )
-
-    val animatedBgColor by animateColorAsState(
-        targetValue = colors[pagerState.currentPage],
-        animationSpec = tween(500),
-        label = "bgColor"
-    )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(animatedBgColor)
+            .background(Color(0xFFF7F8FC))
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             HorizontalPager(
@@ -98,7 +85,7 @@ fun OnboardingPage(page: Int) {
         Spacer(modifier = Modifier.height(48.dp))
         
         when (page) {
-            0 -> HabitOnboardingContent()
+            0 -> HabitOnboardingContent( )
             1 -> TaskOnboardingContent()
             2 -> FocusOnboardingContent()
         }
@@ -142,185 +129,749 @@ data class HabitItem(val name: String, val icon: ImageVector)
 
 @Composable
 fun HabitOnboardingContent() {
-    val habits = remember {
-        listOf(
-            HabitItem("Meditation", Icons.Default.SelfImprovement),
-            HabitItem("Running", Icons.Default.DirectionsRun),
-            HabitItem("Fitness", Icons.Default.FitnessCenter),
-            HabitItem("Reading", Icons.Default.MenuBook),
-            HabitItem("Productivity", Icons.Default.Bolt),
-            HabitItem("Cycling", Icons.Default.DirectionsBike)
-        )
-    }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "habitFloat")
-    val floatAnim by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 10f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "float"
+    data class HabitUi(
+        val title: String,
+        val icon: ImageVector,
+        val bgColor: Color,
+        val iconColor: Color
     )
 
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    val habits = listOf(
+        HabitUi(
+            "Meditation",
+            Icons.Default.SelfImprovement,
+            Color(0xFFE8DDF8),
+            Color(0xFF6C4AB6)
+        ),
+        HabitUi(
+            "Running",
+            Icons.Default.DirectionsRun,
+            Color(0xFFF9DDCF),
+            Color(0xFFD96C3D)
+        ),
+        HabitUi(
+            "Fitness",
+            Icons.Default.FitnessCenter,
+            Color(0xFFD8F3E4),
+            Color(0xFF1F7A5C)
+        ),
+        HabitUi(
+            "Reading",
+            Icons.Default.MenuBook,
+            Color(0xFFF6E9B9),
+            Color(0xFF8C6A00)
+        ),
+        HabitUi(
+            "Breathing",
+            Icons.Default.Air,
+            Color(0xFFD9EEF9),
+            Color(0xFF2979A8)
+        ),
+        HabitUi(
+            "Cycling",
+            Icons.Default.DirectionsBike,
+            Color(0xFFF8D9DF),
+            Color(0xFFC44569)
+        )
+    )
+
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp)
-            .offset(y = floatAnim.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(8.dp)
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        items(habits) { habit ->
-            Card(
-                modifier = Modifier
-                    .aspectRatio(1f)
-                    .clip(RoundedCornerShape(24.dp))
-                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f), RoundedCornerShape(24.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+
+        Column {
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                userScrollEnabled = false
             ) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = habit.icon,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = habit.name,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
+
+                items(habits) { habit ->
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.2f),
+                        shape = RoundedCornerShape(28.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = habit.bgColor
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 0.dp
+                        )
+                    ) {
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(18.dp),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+
+                            Box(
+                                modifier = Modifier
+                                    .size(42.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.7f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = habit.icon,
+                                    contentDescription = null,
+                                    tint = habit.iconColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+
+                            Text(
+                                text = habit.title,
+                                color = habit.iconColor,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                        }
+                    }
                 }
             }
+        }
+
+        Column {
+
+            Text(
+                text = "01 · HABITS",
+                color = Color(0xFF7A7FE2),
+                style = MaterialTheme.typography.labelSmall,
+                letterSpacing = 2.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Build better\nhabits, daily.",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 42.sp
+                ),
+                color = Color(0xFF0B132B)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Track routines and maintain powerful streaks every single day.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF6B7280),
+                lineHeight = 26.sp
+            )
         }
     }
 }
 
 @Composable
 fun TaskOnboardingContent() {
+
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        TaskCard(
-            title = "Finalize UI Design",
-            category = "Work",
-            priority = "High",
-            isCompleted = false,
-            onToggle = {},
-            onClick = {}
-        )
-        
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            shape = RoundedCornerShape(24.dp)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Productivity", fontWeight = FontWeight.Bold)
-                    Text("85%", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-                LinearProgressIndicator(
-                    progress = { 0.85f },
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(170.dp)
+            ) {
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .height(120.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = 0.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE6D9FF)
+                    ),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {}
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth(0.82f)
+                        .height(120.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = 10.dp),
+                    shape = RoundedCornerShape(28.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFCDEFFF)
+                    ),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {}
+
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(8.dp)
-                        .clip(CircleShape),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                        .height(150.dp)
+                        .align(Alignment.BottomCenter),
+                    shape = RoundedCornerShape(30.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = 2.dp
+                    )
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(18.dp),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(Color(0xFFFFD9C8))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = "HIGH",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFFD86D3E)
+                                )
+                            }
+
+                            Box(
+                                contentAlignment = Alignment.Center
+                            ) {
+
+                                CircularProgressIndicator(
+                                    progress = { 0.68f },
+                                    modifier = Modifier.size(38.dp),
+                                    strokeWidth = 4.dp,
+                                    color = Color(0xFF3554D1),
+                                    trackColor = Color(0xFFE9EDFF)
+                                )
+
+                                Text(
+                                    text = "68%",
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF3554D1)
+                                )
+                            }
+                        }
+
+                        Column {
+                            Text(
+                                text = "Design system v2",
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = Color(0xFF0B132B)
+                            )
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
+                            Text(
+                                text = "8 of 12 subtasks complete",
+                                fontSize = 13.sp,
+                                color = Color(0xFF7B8190)
+                            )
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 4.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Row {
+
+                                listOf(
+                                    Color(0xFFF4A261),
+                                    Color(0xFFE9C46A),
+                                    Color(0xFF6FCF97)
+                                ).forEachIndexed { index, color ->
+
+                                    Box(
+                                        modifier = Modifier
+                                            .offset(x = (-index * 6).dp)
+                                            .size(20.dp)
+                                            .clip(CircleShape)
+                                            .background(color)
+                                            .border(
+                                                2.dp,
+                                                Color.White,
+                                                CircleShape
+                                            )
+                                    )
+                                }
+                            }
+
+                            Row(
+                                modifier = Modifier.wrapContentWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Icon(
+                                    imageVector = Icons.Default.CalendarToday,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(12.dp),
+                                    tint = Color(0xFF7B8190)
+                                )
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                Text(
+                                    text = "Today",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF7B8190),
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFCFF4DF)
                 )
+            ) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = Color(0xFF1B7F5A),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+
+                        Text(
+                            text = "Morning standup",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF126B4A)
+                        )
+
+                        Text(
+                            text = "Completed · 9:30 AM",
+                            fontSize = 12.sp,
+                            color = Color(0xFF3B7C63)
+                        )
+                    }
+
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = Color(0xFF3B7C63),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White
+                )
+            ) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Box(
+                        modifier = Modifier
+                            .size(45.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFFF4CC)),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+
+                            Text(
+                                text = "JUN",
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFB58A00)
+                            )
+
+                            Text(
+                                text = "14",
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFB58A00)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(14.dp))
+
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+
+                        Text(
+                            text = "Design review",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0B132B)
+                        )
+
+                        Text(
+                            text = "Tomorrow · 11:00 AM",
+                            fontSize = 12.sp,
+                            color = Color(0xFF7B8190)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color(0xFFDDF3FF))
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+
+                        Text(
+                            text = "MED",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF2196F3)
+                        )
+                    }
+                }
             }
         }
 
-        TaskCard(
-            title = "Buy Groceries",
-            category = "Personal",
-            priority = "Medium",
-            isCompleted = true,
-            onToggle = {},
-            onClick = {}
-        )
+        Column {
+
+            Text(
+                text = "02 · TASKS",
+                color = Color(0xFF7A7FE2),
+                style = MaterialTheme.typography.labelSmall,
+                letterSpacing = 2.sp
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Organize\nyour tasks.",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    lineHeight = 42.sp
+                ),
+                color = Color(0xFF081225)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "Manage todos, deadlines and projects with calm clarity.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF6B7280),
+                lineHeight = 26.sp
+            )
+        }
     }
 }
 
 @Composable
 fun FocusOnboardingContent() {
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+
+    val infiniteTransition = rememberInfiniteTransition(label = "focus_animation")
+
     val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.05f,
+        initialValue = 0.96f,
+        targetValue = 1.04f,
         animationSpec = infiniteRepeatable(
-            animation = tween(1500, easing = FastOutSlowInEasing),
+            animation = tween(
+                durationMillis = 2400,
+                easing = FastOutSlowInEasing
+            ),
             repeatMode = RepeatMode.Reverse
         ),
         label = "scale"
     )
 
-    Box(
+    val glowScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 2400,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glowScale"
+    )
+
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(300.dp),
-        contentAlignment = Alignment.Center
+            .fillMaxSize()
+            .padding(horizontal = 24.dp, vertical = 20.dp),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        // Floating particles
-        repeat(5) { i ->
-            val angle = (i * 72f)
-            val particleAlpha by infiniteTransition.animateFloat(
-                initialValue = 0.2f,
-                targetValue = 0.8f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000 + i * 200, easing = LinearEasing),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "alpha$i"
-            )
-            
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             Box(
                 modifier = Modifier
-                    .size(8.dp)
-                    .offset(x = (80 * kotlin.math.cos(angle)).dp, y = (80 * kotlin.math.sin(angle)).dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = particleAlpha))
-            )
+                    .size(260.dp),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Box(
+                    modifier = Modifier
+                        .size(220.dp)
+                        .scale(glowScale)
+                        .clip(CircleShape)
+                        .background(
+                            Color(0xFF4C6FFF).copy(alpha = 0.05f)
+                        )
+                )
+
+                Box(
+                    modifier = Modifier
+                        .size(190.dp)
+                        .scale(glowScale * 0.96f)
+                        .clip(CircleShape)
+                        .background(
+                            Color(0xFF4C6FFF).copy(alpha = 0.04f)
+                        )
+                )
+
+                Canvas(
+                    modifier = Modifier
+                        .size(190.dp)
+                        .scale(scale)
+                ) {
+
+                    drawArc(
+                        color = Color(0xFFE8EBF5),
+                        startAngle = 0f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        style = Stroke(
+                            width = 14.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+
+                    drawArc(
+                        color = Color(0xFF3554D1),
+                        startAngle = 140f,
+                        sweepAngle = 290f,
+                        useCenter = false,
+                        style = Stroke(
+                            width = 14.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Text(
+                        text = "24:18",
+                        style = MaterialTheme.typography.displayMedium.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                        color = Color(0xFF0B132B)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Icon(
+                            imageVector = Icons.Default.LocalFireDepartment,
+                            contentDescription = null,
+                            tint = Color(0xFFFF8A65),
+                            modifier = Modifier.size(14.dp)
+                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
+
+                        Text(
+                            text = "Deep Work",
+                            color = Color(0xFF6B7280),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+
+                FocusStatCard(
+                    modifier = Modifier.weight(1f),
+                    title = "TODAY",
+                    value = "2h 40m",
+                    bgColor = Color(0xFFDDF3FF),
+                    textColor = Color(0xFF0066B2)
+                )
+
+                FocusStatCard(
+                    modifier = Modifier.weight(1f),
+                    title = "STREAK",
+                    value = "12 days",
+                    bgColor = Color(0xFFFFF1CC),
+                    textColor = Color(0xFFB7791F)
+                )
+
+                FocusStatCard(
+                    modifier = Modifier.weight(1f),
+                    title = "SESSIONS",
+                    value = "5",
+                    bgColor = Color(0xFFDDF7E7),
+                    textColor = Color(0xFF1B7F5A)
+                )
+            }
         }
 
-        ProgressRing(
-            progress = 0.75f,
-            modifier = Modifier
-                .size(200.dp)
-                .scale(scale),
-            strokeWidth = 12f
-        )
-        
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column {
+
             Text(
-                text = "25:00",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.primary
+                text = "03 · FOCUS",
+                color = Color(0xFF7A7FE2),
+                style = MaterialTheme.typography.labelSmall,
+                letterSpacing = 2.sp
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
-                text = "FOCUS",
-                style = MaterialTheme.typography.labelLarge,
-                letterSpacing = 2.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "Stay deeply\nfocused.",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    lineHeight = 42.sp
+                ),
+                color = Color(0xFF081225)
+            )
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Text(
+                text = "Run pomodoro sessions and protect your deep work time.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = Color(0xFF6B7280),
+                lineHeight = 28.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun FocusStatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    value: String,
+    bgColor: Color,
+    textColor: Color
+) {
+
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = bgColor
+        ),
+        elevation = CardDefaults.cardElevation(0.dp)
+    ) {
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+
+            Text(
+                text = title,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Medium,
+                color = textColor.copy(alpha = 0.7f),
+                letterSpacing = 1.sp,
+                maxLines = 1
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+                text = value,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = textColor,
+                maxLines = 1
             )
         }
     }
@@ -351,7 +902,6 @@ fun OnboardingBottomBar(
             Spacer(modifier = Modifier.width(60.dp))
         }
 
-        // Dots
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             repeat(3) { index ->
                 val width by animateDpAsState(
