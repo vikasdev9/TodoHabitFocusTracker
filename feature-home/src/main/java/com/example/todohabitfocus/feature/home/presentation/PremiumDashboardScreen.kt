@@ -1,36 +1,35 @@
 package com.example.todohabitfocus.feature.home.presentation
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.todohabitfocus.core.designsystem.theme.PastelBlue
-import com.example.todohabitfocus.core.designsystem.theme.PastelGreen
-import com.example.todohabitfocus.core.designsystem.theme.PastelPurple
-import com.example.todohabitfocus.core.domain.model.Priority
-import com.example.todohabitfocus.core.domain.model.Task
-import com.example.todohabitfocus.core.ui.components.PriorityChip
-import com.example.todohabitfocus.core.ui.components.ProgressRing
-import com.example.todohabitfocus.feature.home.presentation.components.*
+
+// Premium Palette
+private val BgColor = Color(0xFFF6F7FB)
+private val PrimaryBlue = Color(0xFF3554D1)
+private val DarkBlue = Color(0xFF0B132B)
+private val GrayText = Color(0xFF7B8190)
+private val CardPurple = Color(0xFFE9DDFB)
+private val CardBlue = Color(0xFFDDF3FF)
+private val CardPeach = Color(0xFFF8DDCF)
+private val CardGreen = Color(0xFFD9F5E5)
 
 @Composable
 fun PremiumDashboardRoute(
@@ -52,272 +51,500 @@ fun PremiumDashboardScreen(
     onNavigateToFocus: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var visible by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        visible = true
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(animationSpec = tween(800)) + slideInVertically(
-                initialOffsetY = { 40 },
-                animationSpec = tween(800)
-            )
+    Scaffold(
+        containerColor = BgColor,
+        contentWindowInsets = WindowInsets(0)
+    ) { padding ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                start = 24.dp,
+                end = 24.dp,
+                top = 0.dp,
+                bottom = padding.calculateBottomPadding() + 24.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            com.example.todohabitfocus.core.ui.components.PullToRefreshWrapper(
-                isRefreshing = uiState.isLoading,
-                onRefresh = { viewModel.loadDashboardData() } // Assuming this exists or similar
-            ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    item { 
-                        DashboardHeader(uiState.userName)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    
-                    item {
-                        StatsOverviewRow(
-                            upcoming = uiState.upcomingTasks.size,
-                            today = uiState.upcomingTasks.count { it.dueDate != null }, // Simplified logic for mock
-                            completed = 12 // Mock completed count
-                        )
-                    }
-                    
-                    item {
-                        SectionHeader("Focus Stats", onActionClick = onNavigateToFocus)
-                        FocusStatsCard(
-                            time = "${uiState.focusStats.totalFocusTimeMinutes}m",
-                            sessions = uiState.focusStats.sessionsCompleted,
-                            progress = 0.65f // Mock progress
-                        )
-                    }
+            // Precise Top Spacing
+            item {
+                Spacer(modifier = Modifier.statusBarsPadding())
+            }
 
-                    item {
-                        SectionHeader("Recent Tasks", onActionClick = onNavigateToTasks)
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            uiState.upcomingTasks.take(3).forEach { task ->
-                                PremiumTaskCard(task)
-                            }
-                        }
-                    }
-                    
-                    item {
-                        SectionHeader("Habit Streaks", onActionClick = onNavigateToHabits)
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            contentPadding = PaddingValues(bottom = 8.dp)
-                        ) {
-                            items(uiState.habitStreaks) { streak ->
-                                PremiumHabitStreakItem(streak)
-                            }
-                        }
-                    }
-                    
-                    item {
-                        SectionHeader("Weekly Activity")
-                        WeeklyActivityChart(uiState.weeklyActivity)
-                    }
-                    
-                    item { Spacer(modifier = Modifier.height(32.dp)) }
-                }
+            // 1. Header
+            item {
+                DashboardHeader(
+                    userName = "Alex Morgan",
+                    onSettingsClick = {},
+                    onNotificationsClick = {},
+                    onAddClick = {}
+                )
+            }
+
+            // 2. Search Bar
+            item {
+                SearchBar(onSearch = {})
+            }
+
+            // 3. Today's Overview
+            item {
+                TodayOverviewSection()
+            }
+
+            // 4. Focus Session Card
+            item {
+                FocusSessionCard(
+                    timeRemaining = "15:24",
+                    sessionName = "Design system",
+                    onResumeClick = onNavigateToFocus
+                )
+            }
+
+            // 5. Recent Tasks
+            item {
+                RecentTasksSection(onSeeAllClick = onNavigateToTasks)
+            }
+
+            // 6. Upcoming
+            item {
+                UpcomingSection()
             }
         }
     }
 }
 
 @Composable
-fun DashboardHeader(userName: String) {
+fun DashboardHeader(
+    userName: String,
+    onSettingsClick: () -> Unit,
+    onNotificationsClick: () -> Unit,
+    onAddClick: () -> Unit
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 24.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = "Hello,",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "$userName ✨",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        
-        Surface(
-            modifier = Modifier.size(48.dp),
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = userName.take(1).uppercase(),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun StatsOverviewRow(upcoming: Int, today: Int, completed: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        SmallStatCard("Upcoming", upcoming.toString(), PastelBlue, Modifier.weight(1f))
-        SmallStatCard("Today", today.toString(), PastelPurple, Modifier.weight(1f))
-        SmallStatCard("Done", completed.toString(), PastelGreen, Modifier.weight(1f))
-    }
-}
-
-@Composable
-fun SmallStatCard(title: String, value: String, color: Color, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.15f)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.Start
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-@Composable
-fun PremiumTaskCard(task: Task) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProgressRing(
-                progress = if (task.isCompleted) 1f else 0.3f,
-                modifier = Modifier.size(42.dp),
-                strokeWidth = 4f
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = task.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.Schedule,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Due Today",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            
-            PriorityChip(priority = task.priority.name)
-        }
-    }
-}
-
-@Composable
-fun FocusStatsCard(time: String, sessions: Int, progress: Float) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
+        // Avatar
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(Color(0xFF6366F1), Color(0xFFA855F7))
-                    )
-                )
-                .padding(24.dp)
+                .size(52.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFFDCBBD)) // Soft peach for avatar bg
         ) {
+            // Placeholder for avatar image
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Greeting
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Good morning",
+                style = MaterialTheme.typography.bodyMedium,
+                color = GrayText
+            )
+            Text(
+                text = "$userName 👋",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = DarkBlue
+            )
+        }
+
+        // Action Buttons
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            HeaderIconButton(icon = Icons.Outlined.Settings, onClick = onSettingsClick)
+            HeaderIconButton(icon = Icons.Outlined.Notifications, onClick = onNotificationsClick, showDot = true)
+            
+            FloatingActionButton(
+                onClick = onAddClick,
+                containerColor = PrimaryBlue,
+                contentColor = Color.White,
+                shape = CircleShape,
+                modifier = Modifier.size(48.dp),
+                elevation = FloatingActionButtonDefaults.elevation(0.dp)
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+        }
+    }
+}
+
+@Composable
+fun HeaderIconButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    onClick: () -> Unit,
+    showDot: Boolean = false
+) {
+    Box {
+        Surface(
+            onClick = onClick,
+            modifier = Modifier.size(48.dp),
+            shape = CircleShape,
+            color = Color.White,
+            border = BorderStroke(1.dp, Color(0xFFE5E7EB))
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = DarkBlue,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+        if (showDot) {
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(Color.Red)
+                    .align(Alignment.TopEnd)
+                    .offset(x = (-4).dp, y = 4.dp)
+                    .border(2.dp, BgColor, CircleShape)
+            )
+        }
+    }
+}
+
+@Composable
+fun SearchBar(onSearch: (String) -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        shape = RoundedCornerShape(28.dp),
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFF3F4F6))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = GrayText,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = "Search tasks, habits...",
+                style = MaterialTheme.typography.bodyLarge,
+                color = GrayText
+            )
+        }
+    }
+}
+
+@Composable
+fun TodayOverviewSection() {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom
+        ) {
+            Text(
+                text = "Today's overview",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = DarkBlue
+            )
+            Text(
+                text = "Wed, 12 Jun",
+                style = MaterialTheme.typography.bodyMedium,
+                color = GrayText
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OverviewCard(
+                count = "12",
+                label = "Upcoming",
+                color = CardBlue,
+                textColor = Color(0xFF1E40AF),
+                modifier = Modifier.weight(1f)
+            )
+            OverviewCard(
+                count = "6",
+                label = "Today",
+                color = CardPeach,
+                textColor = Color(0xFF92400E),
+                modifier = Modifier.weight(1f)
+            )
+            OverviewCard(
+                count = "38",
+                label = "Done",
+                color = CardGreen,
+                textColor = Color(0xFF065F46),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun OverviewCard(
+    count: String,
+    label: String,
+    color: Color,
+    textColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.height(110.dp),
+        shape = RoundedCornerShape(32.dp),
+        color = color
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = count,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = textColor
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = textColor.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+fun FocusSessionCard(
+    timeRemaining: String,
+    sessionName: String,
+    onResumeClick: () -> Unit
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        color = PrimaryBlue
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
                     Text(
-                        "Deep Focus",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = Color.White.copy(alpha = 0.8f)
+                        text = "FOCUS SESSION",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Color.White.copy(alpha = 0.7f),
+                        letterSpacing = 1.sp
                     )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        time,
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.ExtraBold,
+                        text = "Deep Work · 25 min",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        "$sessions sessions completed",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.7f)
+                        text = "Resume your \"$sessionName\" session",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Color.White.copy(alpha = 0.8f)
                     )
                 }
+
+                // Timer Progress
+                Box(contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(
+                        progress = { 0.6f },
+                        modifier = Modifier.size(64.dp),
+                        color = Color.White,
+                        strokeWidth = 6.dp,
+                        trackColor = Color.White.copy(alpha = 0.2f)
+                    )
+                    Text(
+                        text = timeRemaining,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Button(
+                    onClick = onResumeClick,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(28.dp)
+                ) {
+                    Text(
+                        text = "Resume",
+                        color = PrimaryBlue,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                HeaderIconButton(icon = Icons.Outlined.Timer, onClick = {}, showDot = false)
+            }
+        }
+    }
+}
+
+@Composable
+fun RecentTasksSection(onSeeAllClick: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionHeader(title = "Recent tasks", actionLabel = "See all", onActionClick = onSeeAllClick)
+        
+        RecentTaskCard(
+            category = "DESIGN",
+            title = "Mobile app redesign",
+            progress = 0.72f,
+            backgroundColor = CardPurple,
+            accentColor = Color(0xFF6D28D9),
+            pillLabel = "Today"
+        )
+        RecentTaskCard(
+            category = "RESEARCH",
+            title = "User interviews — Q3",
+            progress = 0.45f,
+            backgroundColor = CardBlue,
+            accentColor = Color(0xFF2563EB),
+            pillLabel = "Thu"
+        )
+        RecentTaskCard(
+            category = "MARKETING",
+            title = "Launch campaign assets",
+            progress = 0.20f,
+            backgroundColor = CardPeach,
+            accentColor = Color(0xFFC2410C),
+            pillLabel = "Tomorrow",
+            tag = "High"
+        )
+    }
+}
+
+@Composable
+fun SectionHeader(title: String, actionLabel: String, onActionClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = DarkBlue
+        )
+        TextButton(onClick = onActionClick) {
+            Text(
+                text = actionLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryBlue
+            )
+        }
+    }
+}
+
+@Composable
+fun RecentTaskCard(
+    category: String,
+    title: String,
+    progress: Float,
+    backgroundColor: Color,
+    accentColor: Color,
+    pillLabel: String,
+    tag: String? = null
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(32.dp),
+        color = backgroundColor
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = category,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = accentColor.copy(alpha = 0.7f),
+                    letterSpacing = 1.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = accentColor
+                )
+                Spacer(modifier = Modifier.height(12.dp))
                 
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Avatars
+                    OverlappingAvatars()
+                    
+                    if (tag != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            color = Color.White.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                text = tag,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = accentColor
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column(horizontalAlignment = Alignment.End) {
                 Box(contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(
                         progress = { progress },
-                        color = Color.White,
-                        strokeWidth = 8.dp,
-                        modifier = Modifier.size(80.dp),
-                        trackColor = Color.White.copy(alpha = 0.2f)
+                        modifier = Modifier.size(48.dp),
+                        color = accentColor,
+                        strokeWidth = 5.dp,
+                        trackColor = accentColor.copy(alpha = 0.15f)
                     )
-                    Icon(
-                        Icons.Default.Timer,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(28.dp)
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    )
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = pillLabel,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
                     )
                 }
             }
@@ -326,38 +553,216 @@ fun FocusStatsCard(time: String, sessions: Int, progress: Float) {
 }
 
 @Composable
-fun PremiumHabitStreakItem(streak: HabitStreak) {
-    Card(
-        modifier = Modifier.width(110.dp),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (streak.isCompletedToday) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+fun OverlappingAvatars() {
+    val colors = listOf(Color(0xFFFFB2B2), Color(0xFFB2FFB2), Color(0xFFB2B2FF))
+    Row {
+        colors.forEachIndexed { index, color ->
+            Box(
+                modifier = Modifier
+                    .offset(x = (index * (-8)).dp)
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .border(2.dp, Color.White, CircleShape)
+            )
+        }
+        Box(
+            modifier = Modifier
+                .offset(x = (colors.size * (-8)).dp)
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(Color(0xFFF3F4F6))
+                .border(2.dp, Color.White, CircleShape),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Whatshot,
-                contentDescription = null,
-                tint = if (streak.isCompletedToday) MaterialTheme.colorScheme.primary else Color(0xFFFFB74D),
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Text("+1", fontSize = 10.sp, fontWeight = FontWeight.Bold, color = GrayText)
+        }
+    }
+}
+
+@Composable
+fun UpcomingSection() {
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+
+        // HEADER
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
             Text(
-                text = "${streak.streakCount}",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold
+                text = "Upcoming",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = Color(0xFF081225)
             )
-            Text(
-                text = streak.habit.name,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = null,
+                    modifier = Modifier.size(13.dp),
+                    tint = Color(0xFF9AA3B2)
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                Text(
+                    text = "This week",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color(0xFF9AA3B2)
+                )
+            }
+        }
+
+        // ITEMS
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+
+            UpcomingItem(
+                date = "12",
+                month = "JUN",
+                title = "Team standup",
+                time = "Today · 09:30",
+                badgeColor = Color(0xFFE4F4FF),
+                textColor = Color(0xFF2196F3)
             )
+
+            UpcomingItem(
+                date = "12",
+                month = "JUN",
+                title = "Design review",
+                time = "Today · 11:00",
+                badgeColor = Color(0xFFFFF4CC),
+                textColor = Color(0xFFB58A00)
+            )
+
+            UpcomingItem(
+                date = "12",
+                month = "JUN",
+                title = "1:1 with Sarah",
+                time = "Today · 15:00",
+                badgeColor = Color(0xFFFFE5EA),
+                textColor = Color(0xFFD64D6F)
+            )
+        }
+    }
+}
+
+@Composable
+fun UpcomingItem(
+    date: String,
+    month: String,
+    title: String,
+    time: String,
+    badgeColor: Color,
+    textColor: Color
+) {
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(26.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
+        ),
+        border = BorderStroke(
+            1.dp,
+            Color(0xFFF1F3F7)
+        )
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // DATE BADGE
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(badgeColor),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+
+                    Text(
+                        text = month,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = textColor,
+                        letterSpacing = 0.5.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(1.dp))
+
+                    Text(
+                        text = date,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = textColor
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            // TEXT
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color(0xFF081225)
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = time,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color(0xFF8A94A6)
+                )
+            }
+
+            // ADD BUTTON
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFFF5F7FB)),
+                contentAlignment = Alignment.Center
+            ) {
+
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color(0xFF6B7280),
+                    modifier = Modifier.size(18.dp)
+                )
+            }
         }
     }
 }
