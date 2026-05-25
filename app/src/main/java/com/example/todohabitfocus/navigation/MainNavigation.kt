@@ -1,5 +1,7 @@
 package com.example.todohabitfocus.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
@@ -27,6 +29,7 @@ import com.example.todohabitfocus.presentation.appstart.AppStartUiState
 import com.example.todohabitfocus.presentation.appstart.AppStartViewModel
 import com.example.todohabitfocus.presentation.appstart.SplashScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainNavigation(
     viewModel: AppStartViewModel = hiltViewModel()
