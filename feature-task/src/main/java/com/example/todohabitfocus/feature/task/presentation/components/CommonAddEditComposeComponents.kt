@@ -44,7 +44,7 @@ fun PriorityButton(
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(20.dp))
             .background(
                 if (selected) Color(0xFFFFE7B8)
                 else Color.White
@@ -52,7 +52,7 @@ fun PriorityButton(
             .clickable {
                 onClick()
             }
-            .padding(horizontal = 28.dp, vertical = 14.dp), contentAlignment = Alignment.Center) {
+            .padding(horizontal = 24.dp, vertical = 10.dp), contentAlignment = Alignment.Center) {
 
         Text(
             text = text, color = if (selected) Color(0xFFFF9800)

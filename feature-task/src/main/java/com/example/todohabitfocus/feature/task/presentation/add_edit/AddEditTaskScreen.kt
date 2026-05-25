@@ -599,17 +599,24 @@ fun AddEditTaskScreen(
 )
 @Composable
 fun AddTaskPreview() {
+
     AppTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFF8F9FD)
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF8F9FD))
         ) {
+
             AddEditTaskScreen(
                 taskId = null,
                 onNavigateBack = {}
             )
+
         }
+
     }
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
